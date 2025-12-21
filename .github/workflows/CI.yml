@@ -95,7 +95,14 @@ jobs:
             apk update
             apk add build-base cmake protobuf-dev vulkan-loader-dev glslang 
             mkdir build && cd build
-            cmake ../src
+            cmake ../src \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DNCNN_VULKAN=OFF \
+                -DNCNN_BUILD_EXAMPLES=ON \
+                -DNCNN_OPENMP=ON \
+                -DNCNN_RUNTIME_CPU=ON \
+                -DCMAKE_C_FLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=neon -O3" \
+                -DCMAKE_CXX_FLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=neon -O3"
             cmake --build . -j$(nproc)
             mv realesrgan-ncnn-vulkan realesrgan-ncnn-vulkan-alpine-armv7
           "
@@ -132,7 +139,13 @@ jobs:
             apk update
             apk add build-base cmake protobuf-dev vulkan-loader-dev glslang 
             mkdir build && cd build
-            cmake ../src
+            cmake ../src\
+              -DCMAKE_BUILD_TYPE=Release \
+              -DNCNN_VULKAN=OFF \
+              -DNCNN_BUILD_EXAMPLES=ON \
+              -DNCNN_OPENMP=OFF \
+              -DCMAKE_C_FLAGS="-march=armv6 -marm -mfloat-abi=hard -mfpu=vfp -O3" \
+              -DCMAKE_CXX_FLAGS="-march=armv6 -marm -mfloat-abi=hard -mfpu=vfp -O3"
             cmake --build . -j$(nproc)
             mv realesrgan-ncnn-vulkan realesrgan-ncnn-vulkan-alpine-armv6
           "
