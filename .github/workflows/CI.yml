@@ -72,44 +72,104 @@ jobs:
           name: realesrgan-ncnn-vulkan-alpine-arm64
           path: build/realesrgan-ncnn-vulkan-alpine-arm64
 
-  build-arm32:
-    runs-on: ubuntu-latest
-    steps:
+  # build-armv7:
+  #   runs-on: ubuntu-latest
+  #   steps:
 
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: 'recursive'
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: all
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #       with:
+  #         platforms: all
 
-      - name: Compile code in alpine:3.22 ARM32 container
-        run: |
-          docker run --rm --platform linux/arm/v7 \
-          -v .:/source \
-          alpine:3.22 /bin/sh -c "
-            cd /source
-            apk update
-            apk add build-base cmake protobuf-dev vulkan-loader-dev glslang 
-            mkdir build && cd build
-            cmake ../src
-            cmake --build . -j$(nproc)
-            mv realesrgan-ncnn-vulkan realesrgan-ncnn-vulkan-alpine-arm32
-          "
+  #     - name: Compile code in alpine:3.22 ARMv7 container
+  #       run: |
+  #         docker run --rm --platform linux/arm/v7 \
+  #         -v .:/source \
+  #         alpine:3.22 /bin/sh -c '
+  #           cd /source
+  #           apk update
+
+  #           apk add build-base cmake protobuf-dev vulkan-loader-dev glslang 
+
+  #           mkdir build && cd build
+
+  #           cmake ../src \
+  #             -DCMAKE_BUILD_TYPE=Release \
+  #             -DNCNN_BUILD_EXAMPLES=OFF \
+  #             -DNCNN_OPENMP=OFF \
+  #             -DNCNN_RUNTIME_CPU=ON \
+  #             -DCMAKE_C_FLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=neon-vfpv4 -O3" \
+  #             -DCMAKE_CXX_FLAGS="-march=armv7-a -mfloat-abi=hard -mfpu=neon-vfpv4 -O3" \
+  #             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+  #           cmake --build . -j$(nproc)
+  #           mv realesrgan-ncnn-vulkan realesrgan-ncnn-vulkan-alpine-armv7
+  #         '
+          
+  #     - name: Upload armv7 artifact
+  #       uses: actions/upload-artifact@v4
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       with:
+  #         retention-days: 1
+  #         name: realesrgan-ncnn-vulkan-alpine-armv7
+  #         path: build/realesrgan-ncnn-vulkan-alpine-armv7
+
+
+  # build-armv6:
+  #   runs-on: ubuntu-latest
+  #   steps:
+
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: 'recursive'
+
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #       with:
+  #         platforms: all
+
+  #     - name: Compile code in alpine:3.22 ARMv6 container
+  #       run: |
+  #         docker run --rm --platform linux/arm/v6 \
+  #         -v .:/source \
+  #         alpine:3.22 /bin/sh -c '
+  #           cd /source
+  #           apk update
+
+  #           apk add build-base cmake protobuf-dev vulkan-loader-dev glslang 
+
+  #           mkdir build && cd build
+
+  #           cmake ../src \
+  #             -DCMAKE_BUILD_TYPE=Release \
+  #             -DNCNN_VULKAN=OFF \
+  #             -DNCNN_BUILD_EXAMPLES=ON \
+  #             -DNCNN_OPENMP=OFF \
+  #             -DCMAKE_C_FLAGS="-march=armv6 -marm -mfloat-abi=hard -mfpu=vfp -O3" \
+  #             -DCMAKE_CXX_FLAGS="-march=armv6 -marm -mfloat-abi=hard -mfpu=vfp -O3"  \
+  #             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+  #           cmake --build . -j$(nproc)
+  #           mv realesrgan-ncnn-vulkan realesrgan-ncnn-vulkan-alpine-armv6
+  #         '
       
-      - name: Upload arm32 artifact
-        uses: actions/upload-artifact@v4
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          retention-days: 1
-          name: realesrgan-ncnn-vulkan-alpine-arm32
-          path: build/realesrgan-ncnn-vulkan-alpine-arm32
+  #     - name: Upload armv6 artifact
+  #       uses: actions/upload-artifact@v4
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       with:
+  #         retention-days: 1
+  #         name: realesrgan-ncnn-vulkan-alpine-armv6
+  #         path: build/realesrgan-ncnn-vulkan-alpine-armv6
 
   create_release_upload:
-    needs: [build-x64, build-arm64, build-arm32]
+    # needs: [build-x64, build-arm64, build-armv7, build-armv6]
+    needs: [build-x64, build-arm64]
     runs-on: ubuntu-latest
     # CRITICAL: This condition ensures the job only runs if the push was a tag
     if: startsWith(github.ref, 'refs/tags/')
@@ -138,5 +198,5 @@ jobs:
           files: |
             ./artifacts/realesrgan-ncnn-vulkan-alpine-arm64/realesrgan-ncnn-vulkan-alpine-arm64
             ./artifacts/realesrgan-ncnn-vulkan-alpine-x64/realesrgan-ncnn-vulkan-alpine-x64
-            ./artifacts/realesrgan-ncnn-vulkan-alpine-arm32/realesrgan-ncnn-vulkan-alpine-arm32
+            
 
